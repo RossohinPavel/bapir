@@ -5,14 +5,14 @@
  * По планам - класс будет представлять из себя реализацию запросов к скоупу или группе скоупов.
  * Каждый класс будет содержать "сырые" методы, реализующие прямые запросы. Такие методы будут названы также как и в АПИ битрикса. 
  * Помимо этого, будут шорткаты, которые будут формировать соответствующие фильтры для сырых методов.
- * Каждый вызов сырого метода сохраняет результат вызова в атрибуте lastResult.
+ * Каждый вызов сырого метода сохраняет результат вызова в атрибуте lastResult 
  *
  * @author    dfx-17
  * @link
  *
- * @version 0.0.2
+ * @version 0.0.1
  *
- * v0.0.2 (26.11.2024) Начато написание 
+ * v0.0.1 (26.11.2024) Начато написание 
  */
 
 const BX24W = new BX24Wrapper();
@@ -131,7 +131,6 @@ class CRMDealProductrowsRequests extends BaseRequests {
 
     /**
      * Получает продукты из сделок. Вызывает метод callLongBatch
-     * 
      * @param {Array<object>} deals - Массив с объектами сделок. В объекте сделки обязательно должен присутствовать ключ ID.
      * 
      * @returns {Promise<Array<Array>>} Массив с результатами ответа.
@@ -286,7 +285,6 @@ class UserRequests extends BaseRequests {
 
     /**
      * Получает сотрудников указанного отделения.
-     * 
      * @param {number | string} department - ид подразделения.
      * @param {object} options - Дополнительные параметры выборки. Заполнять по правилам this.get.
      * 
@@ -296,6 +294,24 @@ class UserRequests extends BaseRequests {
         options = this._checkObject(options);
         options.UF_DEPARTMENT = department;
         return await this.get(options);
+    }
+
+    /**
+     * Получает менеджеров из сделок. Вызывает метод get
+     * @param {Array<object>} deals - Массив с объектами сделок. В объекте сделки обязательно должен присутствовать ключ Ф.
+     * 
+     * @returns {Promise<Array<Array>>} Массив с результатами ответа.
+     */
+    async managersfromDeals(deals) {
+        const preRequests = new Set();
+        for ( const deal of deals ) {
+            deal.ASSIGNED_BY_ID && preRequests.add(deal.ASSIGNED_BY_ID);
+        };
+        const ids = Array.from(preRequests);
+        if ( preRequests.length === 0 ) {
+            return ids;
+        };
+        return await this.get({"@id": ids});
     }
 
     /**
@@ -310,9 +326,9 @@ class UserRequests extends BaseRequests {
      * @param {object} params - Объект с параметрами запроса
      * @param {string} params.sort - Ключ сортировки. Если не указан, то сортировка по id.
      * @param {string} params.order - Направление сортировки. По умолчанию: ASC
-     * @param {object} params.filters - Дополнительные параметры для фильтрации.
+     * @param {object} params.filter - Дополнительные параметры для фильтрации.
      * 
-     * @returns {Promise<Array>} Массив с результатами ответа. 
+     * @returns {Promise<Array<Object>>} Массив с результатами ответа. 
      */
     async get({sort, order, ...filter}) {
         filter.SORT = sort !== undefined ? sort : 'ID';
