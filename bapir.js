@@ -5,24 +5,27 @@
  * По планам - класс будет представлять из себя реализацию запросов к скоупу или группе скоупов.
  * Каждый класс будет содержать "сырые" методы, реализующие прямые запросы. Такие методы будут названы также как и в АПИ битрикса. 
  * Помимо этого, будут шорткаты, которые будут формировать соответствующие фильтры для сырых методов.
- * Каждый вызов сырого метода сохраняет результат вызова в атрибуте lastResult 
+ * Каждый вызов сырого метода сохраняет результат вызова в атрибуте result 
  *
  * @author    dfx-17
  * @link
  *
- * @version 0.0.1
+ * @version 0.0.2
  *
+ * v0.0.2 (04.12.2024) Изменена логика функций, которые организуют связи.
  * v0.0.1 (26.11.2024) Начато написание 
  */
 
 const BX24W = new BX24Wrapper();
 
 
+
+
 /**
- * Итератор по lastResult. 
- * Если lastResult объект, то вернет его.
- * Если lastResult массив, то вернет его значения.
- * Если lastResult вложенный массив, как получается при результате батч запросов, то будет возвращать каждый его елемент.
+ * Итератор по result. 
+ * Если result объект, то вернет его.
+ * Если result массив, то вернет его значения.
+ * Если result вложенный массив, как получается при результате батч запросов, то будет возвращать каждый его елемент.
  */
 function *flatIterator(obj) {
     if ( Array.isArray(obj) ) {
@@ -35,7 +38,22 @@ function *flatIterator(obj) {
         return;
     };
     yield obj;
-};
+}
+
+
+/**
+ * Реализует асинхронную статичную функцию для класса.
+ * @param {*} cls - ссылка на класс
+ * @param {*} func - название функции
+ * @returns 
+ */
+function getStaticFunction(cls, func) {
+    return async function (...args) {
+        const obj = new cls();
+        await obj[func](...args);
+        return obj;
+    }
+}
 
 
 
@@ -50,27 +68,45 @@ class BaseRequests {
      * Инициализирует атрибуты, которые должен иметь каждый объект
      */
     constructor() {
-        this.lastResult = null;     // Результат последнего запроса к этому скоупу.
+        this.result = null;     // Результат последнего запроса к этому скоупу.
     }
 
     /**
-     * Проверяет переданное значение на соответствие объекту. 
-     * Возвращает объект. Если переданное значение соответствует типу объекта, то возвращает его или создает новый. 
-     * @param {*} obj - Объект для проверки
-     * 
-     * @returns {object} Результат проверки
+     * Возвращает представление result в виде объекта, где ключи - ID (или id) объекта, а значения - сам объект.
+     * Внимание! Повторяющиеся сущности, у которых один id будут объеденены.
+     * @returns {object}
      */
-    _checkObject(obj) {
-        return typeof obj === 'object' && !Array.isArray(obj) && obj !== null ? obj : {};
+    byID() {
+        const obj = {};
+        flatIterator(this.result).forEach((item, index) => {
+            const id = item.ID || item.id || index;
+            obj[id] = item;
+        });
+        return obj;
+    }
+
+    /**
+     * Общая реализация списочного метода для API-запросов.
+     * По факту, вызывает callListMethod объекта BX24Wrapper для переданного endpoint.
+     * @async
+     * 
+     * @param {string} endpoint - Эндпоинт апи, к которому будет произведен запрос
+     * @param {object} params - Параметры запроса.
+     * 
+     * @returns {Array<object>}
+     */
+    async _callListMethod(endpoint, params) {
+        return this.result = await BX24W.callListMethod(endpoint, params);
     }
 
     /**
      * Формирует батч запрос и шлет его на endpoint и возвращает ответ.
      * @async
+     * 
      * @param {string} endpoint - Эндпоинт запроса
      * @param {Array<object>} requests - Массив запросов.
      * 
-     * @returns {Array<Array>} Результат запроса.
+     * @returns {Promise<Array<Array<object>>>} Результат запроса.
      */
     async _callLongBatch(endpoint, requests) {
         if ( requests.length === 0 ) {
@@ -81,18 +117,17 @@ class BaseRequests {
     };
 
     /**
-     * Общая реализация списочного метода для API-запросов.
+     * Общая реализация единичного запроса для API.
+     * По факту, вызывает callMethod объекта BX24Wrapper для переданного endpoint.
+     * @async
+     * 
      * @param {string} endpoint - Эндпоинт апи, к которому будет произведен запрос
-     * @param {Array<string>} select - Поля, которые должны присутствовать в ответе для элемента
-     * @param {object} filter - Поля по которым будет производиться фильтрация
-     * @param {object} order - Поля, по которым будет произведена сортировка
+     * @param {object} params - Параметры запроса.
+     * 
+     * @returns {Array<object>}
      */
-    async list(endpoint, select, filter, order) {
-        const params = {};
-        select && (params.select = select);
-        order && (params.order = order);
-        filter && (params.filter = filter);
-        return this.lastResult = await BX24W.callListMethod(endpoint, params);
+    async _callMethod(endpoint, params) {
+        return this.result = await BX24W.callMethod(endpoint, params);
     }
 }
 
@@ -103,21 +138,87 @@ class BaseRequests {
  * Запросы для catalog.product
  */
 class CatalogProductRequests extends BaseRequests {
+    // Статичные методы текущего скоупа
+    static list = getStaticFunction(CatalogProductRequests, 'list');
 
     /**
      * Получает список товаров по фильтру.
+     * @see https://apidocs.bitrix24.ru/api-reference/catalog/product/catalog-product-list.html
      * 
+     * @async
      * @param {object} params - Параметры запроса
      * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
      * @param {object} params.filter - Объект полей для фильтрации
      * @param {object} params.order - Объект полей для Сортировки
-     * 
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-list.html
-     * 
-     * @returns {Promise<Array>} Массив с результатами ответа. 
+     * @returns {Promise<Array<object>>}
      */
     async list({select, filter, order}) {
-        return super.list('catalog.product.list', select, filter, order);
+        const params = {};
+        select != undefined && (params.select = select);
+        filter != undefined && (params.filter = filter);
+        order != undefined && (params.order = order);
+        return this._callListMethod('catalog.product.list', params);
+    }
+}
+
+
+/**
+ * Запросы для crm.category
+ */
+class CRMCategoryRequests extends BaseRequests {
+    // Статичные методы текущего скоупа
+    static list = getStaticFunction(CRMCategoryRequests, 'list');
+
+    /**
+     * Получает список воронок
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/universal/category/crm-category-list.html
+     * 
+     * @async
+     * @returns {Promise<object>}
+     */
+    async funnels() {
+        await this.list(2);     // Сущности воронок
+        return this.result = this.result.categories;
+    }
+
+    /**
+     * Получает список crm сущностей.
+     * Список будет под ключом "categories"
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/universal/category/crm-category-list.html
+     * 
+     * @async
+     * @param {number} entityTypeId - ИД црм сущности
+     * @returns {Promise<object>}
+     */
+    async list(entityTypeId=2) {
+        return this._callMethod('crm.category.list', {entityTypeId: entityTypeId});
+    }
+}
+
+
+
+
+class CRMCompanyRequests extends BaseRequests {
+    // Статичные методы текущего скоупа
+    static list = getStaticFunction(CRMCompanyRequests, 'list');
+
+    /**
+     * Получает список команий по фильтру.
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-list.html
+     * 
+     * @async
+     * @param {object} params - Параметры запроса
+     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
+     * @param {object} params.filter - Объект полей для фильтрации
+     * @param {object} params.order - Объект полей для Сортировки
+     * @returns {Promise<Array<object>>}
+     */
+    async list({select, filter, order}) {
+        const params = {};
+        select != undefined && (params.select = select);
+        filter != undefined && (params.filter = filter);
+        order != undefined && (params.order = order);
+        return this._callListMethod('crm.company.list', params);
     }
 }
 
@@ -130,28 +231,16 @@ class CatalogProductRequests extends BaseRequests {
 class CRMDealProductrowsRequests extends BaseRequests {
 
     /**
-     * Получает продукты из сделок. Вызывает метод callLongBatch
-     * @param {Array<object>} deals - Массив с объектами сделок. В объекте сделки обязательно должен присутствовать ключ ID.
-     * 
-     * @returns {Promise<Array<Array>>} Массив с результатами ответа.
-     */
-    async fromDeals(deals) {
-        const requests = [];
-        for ( const deal of deals ) {
-            requests.push({'id': deal.ID});
-        };
-        return this.lastResult = await this._callLongBatch('crm.deal.productrows.get', requests);
-    }
-
-    /**
      * Обновляет продукты, наделяет их метаинформацией по группам продуктов
      * Чтобы метод отработал корректно, нужен результат предыдущего запроса. 
-     * В lastResult должен лежать объект или массив с продуктами.
+     * В result должен лежать объект или массив с продуктами.
+     * 
+     * @async
      */
     async updateProductsGroupsInfo() {
         const variationByProduct = {};
         const variationsRequests = [];
-        for (const product of flatIterator(this.lastResult) ) {
+        for (const product of flatIterator(this.result) ) {
             if ( !variationByProduct[product.PRODUCT_ID] ) {
                 variationByProduct[product.PRODUCT_ID] = null;
                 variationsRequests.push({'id': product.PRODUCT_ID});
@@ -181,7 +270,7 @@ class CRMDealProductrowsRequests extends BaseRequests {
         meta.forEach((product, index) => {
             metaByProduct[metaComp[index]] = product.product;
         });
-        for ( const product of flatIterator(this.lastResult) ) {
+        for ( const product of flatIterator(this.result) ) {
             product._variation = variationByProduct[product.PRODUCT_ID];
             product._meta = metaByProduct[product.PRODUCT_ID];
         }
@@ -191,12 +280,13 @@ class CRMDealProductrowsRequests extends BaseRequests {
      * Обновляет атрибут _meta у товара, наделяет его массивом всех возможных вариаций для этого продукта.
      * Вызвать этот метод можно только после updateProductsGroupsInfo.
      * 
+     * @async
      * @param {string} select - Поля, которые нужно вернуть для вариаций.
      */
     async updateProductMetaWithAllVariatons(...select) {
         select.push('id', 'iblockId');
         const requests = [];
-        for ( const product of flatIterator(this.lastResult) ) {
+        for ( const product of flatIterator(this.result) ) {
             const request = {
                 filter: {'parentId': product._meta.id, iblockId: 26},
                 select: select,
@@ -204,7 +294,7 @@ class CRMDealProductrowsRequests extends BaseRequests {
             requests.push(request);
         };
         const variations = await this._callLongBatch('catalog.product.list', requests);
-        flatIterator(this.lastResult).forEach((product, index) => {
+        flatIterator(this.result).forEach((product, index) => {
             product._meta._variations = variations[index].products;
         });
     }
@@ -217,23 +307,100 @@ class CRMDealProductrowsRequests extends BaseRequests {
  * Запросы для crm.deal
  */
 class CRMDealRequest extends BaseRequests {
-
+    // Ссылки на дочерние скоупы
     static productrows = CRMDealProductrowsRequests;
+    // Статичные методы текущего скоупа
+    static list = getStaticFunction(CRMDealRequest, 'list');
+
+    /**
+     * Метод для получения Компаний из сделок.
+     * В объектах ответа this.result должен присутствовать ключ COMPANY_ID.
+     * Вызывает метод get у объекта CRMCompanyRequests.
+     * 
+     * @async
+     * @param {object} params - Дополнительные параметры для запроса. Заполнять по правилам CRMCompanyRequests.list
+     * @returns {Promise<CRMCompanyRequests>} Объект UserRequests
+     */
+    async companies(params={}) {
+        const preRequests = new Set();
+        const companies = new CRMCompanyRequests();
+        for ( const deal of flatIterator(this.result) ) {
+            deal.COMPANY_ID && preRequests.add(deal.COMPANY_ID);
+        };
+        const ids = Array.from(preRequests);
+        if ( preRequests.length === 0 ) {
+            companies.result = ids;
+        } else {
+            if ( 'filter' in params ) {
+                params.filter['@ID'] = ids;
+            } else {
+                params.filter = {"@ID": ids};
+            }
+            await companies.list(params);
+        }
+        return companies;
+    }
 
     /**
      * Получает список сделок по фильтрам.
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-list.html
      * 
+     * @async
      * @param {object} params - Параметры запроса
      * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
      * @param {object} params.filter - Перечисление полей для фильтрации
      * @param {object} params.order - Перечисление полей для Сортировки
-     * 
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-list.html
-     * 
-     * @returns {Promise<Array>} Массив с результатами ответа. 
+     * @returns {Promise<Array<object>>}
      */
     async list({select, filter, order}) {
-        return super.list('crm.deal.list', select, filter, order)
+        const params = {};
+        select != undefined && (params.select = select);
+        filter != undefined && (params.filter = filter);
+        order != undefined && (params.order = order);
+        return this._callListMethod('crm.deal.list', params)
+    }
+
+    /**
+     * Метод для получения менеджеров из сделок.
+     * В объектах ответа this.result должен присутствовать ключ ASSIGNED_BY_ID.
+     * Вызывает метод get у объекта UserRequests.
+     * 
+     * @async
+     * @param {object} params - Дополнительные параметры запроса. Заполнять по правилам UserRequests.get
+     * @returns {Promise<UserRequests>} Объект UserRequests
+     */
+    async managers(params={}) {
+        const preRequests = new Set();
+        const users = new UserRequests();
+        for ( const deal of flatIterator(this.result) ) {
+            deal.ASSIGNED_BY_ID && preRequests.add(deal.ASSIGNED_BY_ID);
+        };
+        const ids = Array.from(preRequests);
+        if ( preRequests.length === 0 ) {
+            users.result = ids;
+        } else {
+            params['@id'] = ids;
+            await users.get(params);
+        }
+        return users;
+    }
+
+    /**
+     * Получает продукты из сделок. 
+     * В объектах ответа this.result должен присутствовать ключ ID.
+     * Вызывает метод callLongBatch у объекта CRMDealProductrowsRequests
+     * 
+     * @async
+     * @returns {Promise<CRMDealProductrowsRequests>}
+     */
+    async products() {
+        const requests = [];
+        for ( const deal of flatIterator(this.result) ) {
+            deal.ID && requests.push({'id': deal.ID});
+        };
+        const products = new CRMDealProductrowsRequests();
+        products.result = await products._callLongBatch('crm.deal.productrows.get', requests);
+        return products;
     }
 }
 
@@ -245,33 +412,42 @@ class CRMDealRequest extends BaseRequests {
  */
 class CRMStatusRequests extends BaseRequests {
 
+    static list = getStaticFunction(CRMCompanyRequests, 'list');
+
     /**
      * Получает все возможные статусы (стадии сделок) для указанной воронки
      * 
+     * @async
      * @param {number | string} funnelID - ид воронки
      * @param {object} options - Дополнительные параметры выборки. Заполнять по правилам this.get.
-     * 
-     * @returns {Promise<Array>} Массив с результатами ответа. 
+     * @returns {Promise<Array<object>>} Массив с результатами ответа. 
      */
-    async getFunnelStages(funnelID, options) {
-        const params = this._checkObject(options);
-        params.ENTITY_ID = 'DEAL_STAGE' + (funnelID != 0 ? `_${funnelID}` : '');
-        return await this.list({filter: params});
+    async funnelStages(funnelID, params={}) {
+        const entityId = 'DEAL_STAGE' + (funnelID != 0 ? `_${funnelID}` : '');
+        if ( 'filter' in params ) {
+            params.filter.ENTITY_ID = entityId;
+        } else {
+            params.filter = {ENTITY_ID: entityId};
+        }
+        return this.list(params);
     }
 
     /**
      * Метод возвращает список элементов справочника по фильтру.
-     * Фильтры в этом методе работают только в режиме полного совпаденя. Использование префиксов ни к чему не приведет.
+     * Фильтры в этом методе работают только в режиме полного совпаденя.
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-list.html
+     * 
+     * @async
      * @param {object} params - Параметры для запроса. 
      * @param {object} params.filter - Фильтрация, например { "ENTITY_ID": "STATUS" }
      * @param {object} params.order - Сортировка, например { "SORT": "ASC" }
-     * 
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-list.html
-     * 
-     * @returns {Promise<Array>} Массив с результатами ответа. 
+     * @returns {Promise<Array<object>>}
      */
     async list({filter, order}) {
-        return super.list('crm.status.list', null, filter, order);
+        const params = {};
+        filter != undefined && (params.filter = filter);
+        order != undefined && (params.order = order);
+        return this._callListMethod('crm.status.list', params);
     }
 }
 
@@ -285,33 +461,15 @@ class UserRequests extends BaseRequests {
 
     /**
      * Получает сотрудников указанного отделения.
+     * 
+     * @async
      * @param {number | string} department - ид подразделения.
-     * @param {object} options - Дополнительные параметры выборки. Заполнять по правилам this.get.
-     * 
-     * @returns {Promise<Array>} - Массив с результатами вызова get. 
+     * @param {object} params - Дополнительные параметры выборки. Заполнять по правилам this.get.
+     * @returns {Promise<Array<object>>}
      */
-    async fromDepartment(department, options) {
-        options = this._checkObject(options);
-        options.UF_DEPARTMENT = department;
-        return await this.get(options);
-    }
-
-    /**
-     * Получает менеджеров из сделок. Вызывает метод get
-     * @param {Array<object>} deals - Массив с объектами сделок. В объекте сделки обязательно должен присутствовать ключ Ф.
-     * 
-     * @returns {Promise<Array<Array>>} Массив с результатами ответа.
-     */
-    async managersfromDeals(deals) {
-        const preRequests = new Set();
-        for ( const deal of deals ) {
-            deal.ASSIGNED_BY_ID && preRequests.add(deal.ASSIGNED_BY_ID);
-        };
-        const ids = Array.from(preRequests);
-        if ( preRequests.length === 0 ) {
-            return ids;
-        };
-        return await this.get({"@id": ids});
+    async fromDepartment(department, params={}) {
+        params.UF_DEPARTMENT = department;
+        return this.get(params);
     }
 
     /**
@@ -323,18 +481,18 @@ class UserRequests extends BaseRequests {
      * Чтобы указать дополнительную фильтрацию, занесите в объект filters ключ - имя поля фильтрации с соответствующим значением.
      * @see https://apidocs.bitrix24.ru/api-reference/user/user-get.html
      * 
+     * @async
      * @param {object} params - Объект с параметрами запроса
      * @param {string} params.sort - Ключ сортировки. Если не указан, то сортировка по id.
      * @param {string} params.order - Направление сортировки. По умолчанию: ASC
      * @param {object} params.filter - Дополнительные параметры для фильтрации.
-     * 
-     * @returns {Promise<Array<Object>>} Массив с результатами ответа. 
+     * @returns {Promise<Array<object>>} Массив с результатами ответа. 
      */
     async get({sort, order, ...filter}) {
         filter.SORT = sort !== undefined ? sort : 'ID';
         filter.ORDER = order !== undefined ? order : 'ASC';
         filter.ACTIVE = filter.ACTIVE === undefined || Boolean(filter.ACTIVE);
-        return this.lastResult = await BX24W.callListMethod('user.get', filter);
+        return this._callListMethod('user.get', filter);
     }
 }
 
@@ -342,7 +500,7 @@ class UserRequests extends BaseRequests {
 
 
 /**
- * Сборный класс для запросов к дочерним скоупам crm
+ * Сборный класс для запросов к дочерним скоупам Catalog
  */
 class CatalogCollection {
     static product = CatalogProductRequests;
@@ -355,6 +513,7 @@ class CatalogCollection {
  * Сборный класс для запросов к дочерним скоупам crm
  */
 class CRMCollection {
+    static category = CRMCategoryRequests;
     static deal = CRMDealRequest;
     static status = CRMStatusRequests;
 }
