@@ -11,10 +11,6 @@
  * @link
  *
  * @version 0.0.3
- *
- * v0.0.3 (09.12.2024) Изменена общая логика работы с библиотекой.
- * v0.0.2 (04.12.2024) Изменена логика функций, которые организуют связи.
- * v0.0.1 (26.11.2024) Начато написание 
  */
 
 const BX24W = new BX24Wrapper();
@@ -333,6 +329,25 @@ class CRMCompanyRequest extends Request {
 }
 
 
+/**
+ * Запросы для скоупа crm.deal.userfield
+ */
+class CRMDealUserfieldRequest extends Request{
+
+    /**
+     * Метод возвращает список пользовательских полей сделок по фильтру.
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.html
+     * 
+     * @async
+     * @param {object} params - Параметры запросы
+     * @param {object} params.order - Поля сортировки. { "SORT": "ASC" }
+     * @param {object} params.filter - Поля фильтрации { "MANDATORY": "N" }
+     * @returns {Promise<Array<object>>}
+     */
+    static async list(params={}) {
+        return await Request.callListMethod(CRMDealUserfieldRequest.responseClass, "crm.deal.userfield.list", params);
+    }
+}
 
 
 
@@ -340,6 +355,7 @@ class CRMCompanyRequest extends Request {
  * Запросы для crm.deal
  */
 class CRMDealRequest extends Request {
+    static userfield = CRMDealUserfieldRequest;
 
     static responseClass = CRMDealResponse;
 
@@ -358,7 +374,6 @@ class CRMDealRequest extends Request {
         return await Request.callListMethod(CRMDealRequest.responseClass, 'crm.deal.list', params);
     }
 }
-
 
 
 
@@ -466,6 +481,7 @@ class CatalogCollection {
  */
 class CRMCollection {
     static category = CRMCategoryRequest;
+    static company = CRMCompanyRequest;
     static deal = CRMDealRequest;
     static status = CRMStatusRequest;
 }
