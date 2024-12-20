@@ -10,6 +10,14 @@
  * @author    dfx-17
  * @link
  *
+ * @TODO Попилить на модули
+ * @TODO переписать на тупескрипт
+ * @TODO Дописать оставшиеся запросы.
+ * @TODO Вписать id как стандартное поле для получения в каждый списочный (любой другой возможный) запрос
+ * @TODO Без прямого указания select - извлекать только ID
+ * @TODO реализовать для списочных методов генераторные выражения.
+ * @TODO Подумать на счет фильтров
+ *
  * @version 0.0.3
  */
 
@@ -51,10 +59,10 @@ class Response {
                 const iterator = this.flatIterator(value);
                 for ( const inner of iterator ) {
                     yield inner;
-                };
-            };
+                }
+            }
             return;
-        };
+        }
         yield obj;
     }
 }
@@ -75,7 +83,7 @@ class CRMDealResponse extends Response {
         const preRequests = new Set();
         for ( const deal of this.flatIterator() ) {
             deal.COMPANY_ID && preRequests.add(deal.COMPANY_ID);
-        };
+        }
         const ids = Array.from(preRequests);
         let companies;
         if ( preRequests.length === 0 ) {
@@ -88,6 +96,35 @@ class CRMDealResponse extends Response {
                 params.filter = {"@ID": ids};
             }
             companies = await CRMCompanyRequest.list(params);
+        }
+        return companies;
+    }
+
+    /**
+     * Метод для получения Контактов из сделок.
+     * В объектах сделок должен присутствовать ключ COMPANY_ID.
+     *
+     * @async
+     * @param {object} params - Дополнительные параметры для запроса. Заполнять по правилам CRMCompanyRequest.list
+     * @returns {Promise<Array<object>>}
+     */
+    async contacts(params={}) {
+        const preRequests = new Set();
+        for ( const deal of this.flatIterator() ) {
+            deal.CONTACT_ID && preRequests.add(deal.CONTACT_ID);
+        }
+        const ids = Array.from(preRequests);
+        let companies;
+        if ( preRequests.length === 0 ) {
+            companies = new CRMContactRequest.responseClass();
+            companies.result = ids;
+        } else {
+            if ( 'filter' in params ) {
+                params.filter['@ID'] = ids;
+            } else {
+                params.filter = {"@ID": ids};
+            }
+            companies = await CRMContactRequest.list(params);
         }
         return companies;
     }
@@ -329,6 +366,22 @@ class CRMCompanyRequest extends Request {
 }
 
 
+class CRMContactRequest extends Request {
+    /**
+     * Получает список контактов по фильтру.
+     * @see https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-list.html
+     *
+     * @async
+     * @param {object} params - Параметры запроса
+     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
+     * @param {object} params.filter - Объект полей для фильтрации
+     * @param {object} params.order - Объект полей для Сортировки
+     * @returns {Promise<CatalogProductResponse<Array<object>>>}
+     */
+    static async list(params={}) {
+        return await Request.callListMethod(CRMContactRequest.responseClass, 'crm.contact.list', params);
+    }
+}
 /**
  * Запросы для скоупа crm.deal.userfield
  */
@@ -337,7 +390,7 @@ class CRMDealUserfieldRequest extends Request{
     /**
      * Метод возвращает список пользовательских полей сделок по фильтру.
      * @see https://apidocs.bitrix24.ru/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.html
-     * 
+     *
      * @async
      * @param {object} params - Параметры запросы
      * @param {object} params.order - Поля сортировки. { "SORT": "ASC" }
