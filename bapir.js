@@ -8,15 +8,6 @@
  * Каждый вызов сырого метода сохраняет результат вызова в атрибуте result 
  *
  * @author    dfx-17
- * @link
- *
- * @TODO Попилить на модули
- * @TODO переписать на тупескрипт
- * @TODO Дописать оставшиеся запросы.
- * @TODO Вписать id как стандартное поле для получения в каждый списочный (любой другой возможный) запрос
- * @TODO Без прямого указания select - извлекать только ID
- * @TODO реализовать для списочных методов генераторные выражения.
- * @TODO Подумать на счет фильтров
  *
  * @version 0.0.3
  */
@@ -314,6 +305,47 @@ class CatalogProductRequest extends Request {
 
 
 
+class CatalogProductPropertyEnumRequst extends Request {
+
+    /**
+     * Получить список значений списочных свойств продуктов
+     * @see https://apidocs.bitrix24.ru/api-reference/catalog/product-property-enum/catalog-product-property-enum-list.html
+     * Из-за особенностей метода, вернется массив, который будет содрежать объекты
+     * productPropertyEnums - значение которого в свою очередь тоже является массивом)
+     * 
+     * @async
+     * @param {object} params - Параметры запроса
+     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
+     * @param {object} params.filter - Объект полей для фильтрации
+     * @param {object} params.order - Объект полей для Сортировки
+     */
+    static async list(params={}) {
+        return await Request.callListMethod(CatalogProductPropertyEnumRequst.responseClass, 'catalog.productPropertyEnum.list', params);
+    }
+
+    /**
+     * Получает группы продуктов
+     * 
+     * @async
+     * @param {object} params - Параметры запроса
+     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
+     * @param {object} params.filter - Объект полей для фильтрации
+     * @param {object} params.order - Объект полей для Сортировки
+     */
+    static async productGroups(params={}) {
+        !params.order && (params.order = {});
+        !params.order.value && (params.order.value = 'ASC');
+        !params.select && (params.select = []);
+        !params.select.push('id', 'value');
+        !params.filter && (params.filter = {});
+        !params.filter.propertyId && (params.filter.propertyId = 175);
+        return await CatalogProductPropertyEnumRequst.list(params);
+    }
+}
+
+
+
+
 /**
  * Запросы для crm.category
  */
@@ -524,6 +556,7 @@ class UserRequest extends Request {
  */
 class CatalogCollection {
     static product = CatalogProductRequest;
+    static productPropertyEnum = CatalogProductPropertyEnumRequst;
 }
 
 
@@ -535,6 +568,7 @@ class CatalogCollection {
 class CRMCollection {
     static category = CRMCategoryRequest;
     static company = CRMCompanyRequest;
+    static contact = CRMContactRequest;
     static deal = CRMDealRequest;
     static status = CRMStatusRequest;
 }
@@ -546,6 +580,7 @@ class CRMCollection {
  * Базовый класс для доступа к запросам. Bitrix 24 API Requests
  */
 class BAPIR {
+    static catalog = CatalogCollection;
     static crm = CRMCollection;
     static user = UserRequest;
 }
