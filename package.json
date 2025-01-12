@@ -1,0 +1,31 @@
+{
+  "name": "bapir",
+  "version": "0.1.0",
+  "description": "Bitrix24 API Requests. Готовые запросы к Битриксу.",
+  "main": "index.js",
+  "scripts": {
+    "build": "cross-env TS_NODE_PROJECT=\"tsconfig.json\" webpack",
+    "build-dev": "cross-env TS_NODE_PROJECT=\"tsconfig.json\" webpack --node-env=development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RossohinPavel/bapir.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RossohinPavel/bapir/issues"
+  },
+  "homepage": "https://github.com/RossohinPavel/bapir#readme",
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/webpack": "^5.28.5",
+    "cross-env": "^7.0.3",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
