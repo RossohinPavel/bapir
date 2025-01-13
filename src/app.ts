@@ -7,5 +7,5 @@ import { UserRequests } from "./requests/user";
  */
 export const BAPIR = {
     crm,
-    user: UserRequests,
+    user: UserRequests.method,
 }
