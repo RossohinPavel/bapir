@@ -8,9 +8,11 @@ export const UserRequests: Request = {
     
     /**
      * docs
+     * @param params 
+     * @returns 
      */
-    call: async function (params: {}) {
+    call(params: {}) {
         return Call.method(this, params);
     }
 
-}
+};
