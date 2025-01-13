@@ -1,10 +1,16 @@
-export const UserRequests = {
-    attr: 'test',
+import { Request, Call } from "./base";
+import { BasicRespose } from "../responses/basic";
 
+
+export const UserRequests: Request = {
+    method: 'test',
+    responseClass: BasicRespose,
+    
     /**
      * docs
      */
-    method: async () => {
-        console.log('test');
+    call: async function (params: {}) {
+        return Call.method(this, params);
     }
+
 }
