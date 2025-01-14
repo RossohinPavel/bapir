@@ -1,5 +1,5 @@
-import { crm } from "./requests/crm/scope";
-import { UserRequests } from "./requests/user";
+import { crm } from "./app/request/crm/scope";
+import { UserScope } from "./app/request/user/scope";
 
 
 /**
@@ -7,5 +7,5 @@ import { UserRequests } from "./requests/user";
  */
 export const BAPIR = {
     crm,
-    user: UserRequests.call,
+    user: UserScope
 }
