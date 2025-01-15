@@ -17,6 +17,7 @@ const config: webpack.Configuration = {
         path: path.resolve(__dirname, './dist'),
         filename: `${filename}.js`,
         libraryTarget: 'umd',
+        // iife: false
     },
     module: {
         rules: [
@@ -34,12 +35,12 @@ const config: webpack.Configuration = {
 
 
 if ( devMode ) {
-    config.output.libraryTarget = undefined;
+    // config.output.libraryTarget = undefined;
     config.optimization = {
-        minimize: false,
-        sideEffects: false,
+        // minimize: false,
+        // sideEffects: false,
     };
-    config.output.iife = false;
+    // config.output.iife = false;
 };
 
 

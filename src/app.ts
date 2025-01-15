@@ -1,11 +1,6 @@
-import { crm } from "./app/request/crm/scope";
-import { UserScope } from "./app/request/user/scope";
+import { func } from "./func";
 
 
-/**
- * Базовый объект для доступа к запросам. Bitrix 24 API Requests.
- */
-export const BAPIR = {
-    crm,
-    user: UserScope
-}
+export const value = (function () {
+    return func();
+})();
