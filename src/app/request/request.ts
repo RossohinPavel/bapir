@@ -2,7 +2,7 @@ import { Response } from "../response/response";
 
 
 // Проверка на присутствие класса-обертки BX24Wrapper
-if ( !("BX24Wrapper" in window) ) {
+if ( !("BX24Wrapper" in window) && (typeof BX24Wrapper === 'undefined') ) {
     throw "Can't find BX24Wrapper! See https://github.com/andrey-tech/bx24-wrapper-js";
 };
 

@@ -2,10 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 
 
-const devMode = process.env.node_env === 'development';
-
-let filename = `${process.env.npm_package_name}-${process.env.npm_package_version}`;
-filename += devMode ? '.d' : '';
+const filename = `${process.env.npm_package_name}-${process.env.npm_package_version}.js`;
 
 
 const config: webpack.Configuration = {
@@ -15,7 +12,7 @@ const config: webpack.Configuration = {
     },
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: `${filename}.js`,
+        filename: filename,
         libraryTarget: 'umd',
     },
     module: {
@@ -30,16 +27,6 @@ const config: webpack.Configuration = {
     resolve: {
         extensions: ['.ts', '.tsx'],
     },
-};
-
-
-if ( devMode ) {
-    config.output.libraryTarget = undefined;
-    config.optimization = {
-        minimize: false,
-        sideEffects: false,
-    };
-    config.output.iife = false;
 };
 
 
