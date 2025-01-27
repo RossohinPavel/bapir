@@ -1,4 +1,4 @@
-import { Call } from "./_request";
+import { Call } from "../_request";
 
 
 type UserGetParams = {
