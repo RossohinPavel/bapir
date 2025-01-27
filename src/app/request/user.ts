@@ -1,12 +1,14 @@
 import { Call } from "./_request";
 
+
 type UserGetParams = {
     sort?: string,
     order?: string,
     [key: string]: string | number | boolean
 }
 
-export namespace UserScoupe {
+
+export namespace UserScope {
 
     /**
      * Получения списка пользователей. Не смотрите на название метода, это скам от битрикса.
@@ -21,9 +23,21 @@ export namespace UserScoupe {
      * @param params.order - Направление сортировки.
      * @returns Массив с результатами ответа. 
      */
-
-    export const get = (params: UserGetParams = {}) => {
+    export async function get(params: UserGetParams = {}) {
         params.ACTIVE === undefined && (params.ACTIVE = true);
         return await Call.listMethod('user.get', params);
+    }
+
+    /**
+     * Получает сотрудников указанного отделения.
+     * 
+     * @async
+     * @param department - ид подразделения.
+     * @param params - Дополнительные параметры выборки. Заполнять по правилам UserRequest.get.
+     * @returns Массив с результатами ответа. 
+     */
+    export async function fromDepartment(department: number | string, params: UserGetParams = {}) {
+        params.UF_DEPARTMENT = department;
+        return await get(params);
     }
 }

@@ -1,40 +1,12 @@
 /**
- * Абстрактный класс, который реализует общие методы для ответов.
+ * Абстрактный класс для наследования классов ответов, которые приходят в виде объекта.
  */
-export class Response {
-    static _cache: {[key: string]: any} = {};
-
-    /**
-     * Возвращает объект метода, который был использован для запроса.
-     */
-    get method(): object {
-        return Response._cache[this.constructor.name];
-    }
-}
-
+export class Response {}
 
 /**
- * Абстрактный класс миксин для ответов, которые приходят в соответствующем виде.
+ * Абстрактный класс для наследования классов ответов, которые приходят в виде списка.
  */
-export class ResponseArray extends Response {}
+export class ResponseArray extends Array {}
 
 
-/**
- * Для его корректного существования в тупескрипт нужен интерфейс.
- */
-export interface ResponseArray extends Array<any> {}
-
-
-/**
- * Функция для реализации миксинов
- * @param derivedCtor Класс - приемник поведения
- * @param baseCtors Подмешиваемые классы.
- */
-function applyMixins(derivedCtor: any, baseCtors: any[]) {
-    baseCtors.forEach(baseCtor => {
-        Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
-            derivedCtor.prototype[name] = baseCtor.prototype[name];
-        });
-    });
-}
-applyMixins(ResponseArray, [Array]);
+export type ResponseType = typeof Response | typeof ResponseArray;

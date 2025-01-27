@@ -1,4 +1,4 @@
-import { Response } from "../response/response";
+import { ResponseType } from "../response/response";
 
 
 // Проверка на присутствие класса-обертки BX24Wrapper
@@ -13,6 +13,9 @@ const _BX24Wrapper = BX24Wrapper;
 const BX24W = new _BX24Wrapper();
 
 
+type ParamsType = {[key: string]: any};
+
+
 /**
  * Замыкание, которое реализует общую логику работы библиотеки.
  * Вызывает переданную func и помещает ее результат в переданный объект responseClass.
@@ -20,37 +23,43 @@ const BX24W = new _BX24Wrapper();
  * @returns Асинхронную функцию для запроса.
  */
 function requestClosure(func: any) {
-    async function wrapper(endpoint: string, params={}, responseClass=null): Promise<Response> {
-        const result = await func(request.method, params);
-        const response = new request.responseClass();
-        const className = response.constructor.name;
-        request.responseClass._cache[className] = request;
-        return Object.assign(response, result);
+    async function wrapper(endpoint: string, params: ParamsType = {}, responseClass: ResponseType | null = null): Promise<Response> {
+        let result = await func(endpoint, params);
+        if ( responseClass !== null ) {
+            result = Object.assign(new responseClass(), result);
+        }
+        return result;
     }
     return wrapper;
 }
 
 
 /**
- * Асинхронная функция для работы с батчами.
- * @param endpoint Эндпоинт запроса
- * @param requests Массив запросов. Должны быть сформированы по правилам битрикса
- * @returns Результат батч-запроса.
+ * Основные методы запросов.
  */
-async function callLongBatch(endpoint: string, requests: any[]): Promise<any[]> {
-    if ( !requests.length ) {
-        return [];
+export namespace Call {
+
+    /**
+     * Вызов BX24W.callMethod.
+     */
+    export const method = requestClosure(BX24W.callMethod);
+
+    /**
+     * Вызов BX24W.callListMethod.
+     */
+    export const listMethod = requestClosure(BX24W.callListMethod);
+
+    /**
+     * Асинхронная функция для работы с батчами.
+     * @param endpoint Эндпоинт запроса
+     * @param requests Массив запросов. Должны быть сформированы по правилам битрикса
+     * @returns Результат батч-запроса.
+     */
+    export async function callLongBatch(endpoint: string, requests: any[]): Promise<any[]> {
+        if ( !requests.length ) {
+            return [];
+        }
+        const calls = _BX24Wrapper.createCalls(endpoint, requests);
+        return await BX24W.callLongBatch(calls, false);
     }
-    const calls = _BX24Wrapper.createCalls(endpoint, requests);
-    return await BX24W.callLongBatch(calls, false);
-}
-
-
-/**
- * Объект, который содержит в себе основные методы запросов.
- */
-export const Call = {
-    method: requestClosure(BX24W.callMethod),
-    listMethod: requestClosure(BX24W.callListMethod),
-    longBatch: callLongBatch, 
 }

@@ -1,4 +1,4 @@
-import { UserScope } from "./app/request/user/scope";
+import { UserScope } from "./app/request/user";
 
 
 /**
