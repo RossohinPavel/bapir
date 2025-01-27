@@ -1,9 +1,9 @@
 import { Call } from "../../_request"
 
-type param = string | number | boolean;
+type commonParam = string | number | boolean;
 
-type StatusListParams = {
-    filter?: {[key: string]: param },
+type ListParams = {
+    filter?: {[key: string]: commonParam },
     order?: {[key: string]: string },
 }
 
@@ -21,7 +21,7 @@ export namespace StatusScope {
      * @param {object} params.filter - Фильтрация, например { "ENTITY_ID": "STATUS" }
      * @param {object} params.order - Сортировка, например { "SORT": "ASC" }
      */
-    export async function list(params: StatusListParams = {}) {
+    export async function list(params: ListParams = {}) {
         return await Call.listMethod('crm.status.list', params);
     }
 
@@ -33,7 +33,7 @@ export namespace StatusScope {
      * @param params Дополнительные параметры выборки. Заполнять по правилам CRMStatusResponse.list.
      * @returns Массив с результатами запроса. 
      */
-    export async function funnelStages(funnelID: number | string, params: StatusListParams = {}) {
+    export async function funnelStages(funnelID: number | string, params: ListParams = {}) {
         const filter = params.filter ??= {};
         filter.ENTITY_ID = 'DEAL_STAGE' + (funnelID != 0 ? `_${funnelID}` : '');
         return await list(params);

@@ -1,7 +1,7 @@
 import { Call } from "../_request";
 
 
-type UserGetParams = {
+type GetParams = {
     sort?: string,
     order?: string,
     [key: string]: string | number | boolean
@@ -23,7 +23,7 @@ export namespace UserScope {
      * @param params.order - Направление сортировки.
      * @returns Массив с результатами ответа. 
      */
-    export async function get(params: UserGetParams = {}) {
+    export async function get(params: GetParams = {}) {
         params.ACTIVE === undefined && (params.ACTIVE = true);
         return await Call.listMethod('user.get', params);
     }
@@ -36,7 +36,7 @@ export namespace UserScope {
      * @param params - Дополнительные параметры выборки. Заполнять по правилам UserRequest.get.
      * @returns Массив с результатами ответа. 
      */
-    export async function fromDepartment(department: number | string, params: UserGetParams = {}) {
+    export async function fromDepartment(department: number | string, params: GetParams = {}) {
         params.UF_DEPARTMENT = department;
         return await get(params);
     }
