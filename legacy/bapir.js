@@ -231,42 +231,6 @@ class CRMDealProductrowsResponse extends Response {
 
 
 // ------------------------------------------------------------------------------------ Запросики ----------------------------------------------------------------------------------------------
-/**
- * Базовый класс для всех запросов
- */
-class Request {
-    static responseClass = Response;
-
-    /**
-     * Формирует батч запрос и шлет его на endpoint и возвращает ответ.
-     * 
-     * @async
-     * @param {string} endpoint - Эндпоинт запроса
-     * @param {Array<object>} requests - Массив запросов.
-     * @returns {Promise<Array<Array<object>>>} Результат запроса.
-     */
-    static async callLongBatch(endpoint, requests) {
-        if ( requests.length === 0 ) {
-            return [];
-        }
-        const calls = BX24Wrapper.createCalls(endpoint, requests);
-        return await BX24W.callLongBatch(calls, false);
-    }
-
-    static async callMethod(cls, endpoint, params) {
-        const obj = new cls();
-        obj.result = await BX24W.callMethod(endpoint, params);
-        return obj;
-    }
-
-    static async callListMethod(cls, endpoint, params) {
-        const obj = new cls();
-        obj.result = await BX24W.callListMethod(endpoint, params);
-        return obj
-    }
-}
-
-
 
 /**
  * Запросы для catalog.product
@@ -327,77 +291,5 @@ class CatalogProductPropertyEnumRequst extends Request {
         !params.filter && (params.filter = {});
         !params.filter.propertyId && (params.filter.propertyId = 175);
         return await CatalogProductPropertyEnumRequst.list(params);
-    }
-}
-
-
-
-
-/**
- * Запросы для crm.category
- */
-class CRMCategoryRequest extends Request {
-
-    /**
-     * Получает список crm сущностей.
-     * Список будет под ключом "categories"
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/universal/category/crm-category-list.html
-     * 
-     * @async
-     * @param {number} entityTypeId - ИД црм сущности
-     * @returns {Promise<CRMCategoryResponse<object>>}
-     */
-    static async list(entityTypeId=2) {
-        return await Request.callMethod(CRMCategoryRequest.responseClass, 'crm.category.list', {entityTypeId: entityTypeId});
-    }
-
-    /**
-     * Получает список воронок
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/universal/category/crm-category-list.html
-     * 
-     * @async
-     * @returns {Promise<object>}
-     */
-    static async funnels() {
-        return await CRMCategoryRequest.list(2);
-    }
-}
-
-
-
-
-class CRMCompanyRequest extends Request {
-
-    /**
-     * Получает список команий по фильтру.
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-list.html
-     * 
-     * @async
-     * @param {object} params - Параметры запроса
-     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
-     * @param {object} params.filter - Объект полей для фильтрации
-     * @param {object} params.order - Объект полей для Сортировки
-     * @returns {Promise<CatalogProductResponse<Array<object>>>}
-     */
-    static async list(params={}) {
-        return await Request.callListMethod(CRMCompanyRequest.responseClass, 'crm.company.list', params);
-    }
-}
-
-
-class CRMContactRequest extends Request {
-    /**
-     * Получает список контактов по фильтру.
-     * @see https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-list.html
-     *
-     * @async
-     * @param {object} params - Параметры запроса
-     * @param {Array<string>} params.select - Список полей, которые должны присутствовать в ответе от сервера.
-     * @param {object} params.filter - Объект полей для фильтрации
-     * @param {object} params.order - Объект полей для Сортировки
-     * @returns {Promise<CatalogProductResponse<Array<object>>>}
-     */
-    static async list(params={}) {
-        return await Request.callListMethod(CRMContactRequest.responseClass, 'crm.contact.list', params);
     }
 }
