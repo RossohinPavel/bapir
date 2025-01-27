@@ -1,7 +1,10 @@
+import { ProductScope } from "./product/scope";
+import { ProductPropertyEnumScope } from "./productPropertyEnums/scope";
+
 /**
  * Доступ к дочерним скоупам Catalog
  */
 export namespace CatalogScope {
-    export const product: any = null;
-    export const productPropertyEnum: any = null;
+    export const product = ProductScope;
+    export const productPropertyEnum = ProductPropertyEnumScope;
 }
