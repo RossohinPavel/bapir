@@ -2,7 +2,7 @@ import { Response } from "../response/response";
 
 
 // Проверка на присутствие класса-обертки BX24Wrapper
-if ( !("BX24Wrapper" in window) ) {
+if ( !("BX24Wrapper" in window) && (typeof BX24Wrapper === 'undefined') ) {
     throw "Can't find BX24Wrapper! See https://github.com/andrey-tech/bx24-wrapper-js";
 };
 
@@ -20,7 +20,7 @@ const BX24W = new _BX24Wrapper();
  * @returns Асинхронную функцию для запроса.
  */
 function requestClosure(func: any) {
-    async function wrapper(request: Request, params: object): Promise<Response> {
+    async function wrapper(endpoint: string, params={}, responseClass=null): Promise<Response> {
         const result = await func(request.method, params);
         const response = new request.responseClass();
         const className = response.constructor.name;
@@ -54,27 +54,3 @@ export const Call = {
     listMethod: requestClosure(BX24W.callListMethod),
     longBatch: callLongBatch, 
 }
-
-
-/**
- * Интерфейс, который должны соблюдать все запросы.
- */
-export interface Request {
-    // Метод запроса
-    method: string;
-
-    // Класс, объект которого будет использован для ответа.
-    responseClass: typeof Response;
-
-    // Функция, для получения результата
-    call(params: {[key: string]: any}): Promise<Response>;
-
-    // Техническая переменная, которая будет сохранять в себе результата последнего запроса.
-    params?: object;
-
-    // В этой переменной могут находиться шорткаты для вызова основного метода
-    shortcuts?: {[key: string]: (...args: any[]) => Promise<any>}
-}
-
-
-

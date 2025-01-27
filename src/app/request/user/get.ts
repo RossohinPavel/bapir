@@ -1,4 +1,4 @@
-import { Request, Call } from "../request";
+import { Request, Call } from "../_request";
 import { ResponseArray } from "../../response/response";
 
 
@@ -6,23 +6,7 @@ export const UserGetRequest: Request  = {
     method: 'user.get',
     responseClass: ResponseArray,
 
-    /**
-     * Получения списка пользователей. Не смотрите на название метода, это скам от битрикса.
-     * Выполняет запрос используя списочный метод callListMethod.
-     * Фильтры для запроса нужно формировать по правилам битрикса. Смотри прикрепленную ссылку.
-     * По умолчанию применяется фильтр, что пользователь активен (не уволен).
-     * @see https://apidocs.bitrix24.ru/api-reference/user/user-get.html
-     * 
-     * @async
-     * @param params - Объект с параметрами запроса.
-     * @param params.sort - Ключ сортировки.
-     * @param params.order - Направление сортировки.
-     * @returns Массив с результатами ответа. 
-     */
-    async call(params={}) {
-        params.ACTIVE === undefined && (params.ACTIVE = true);
-        return await Call.listMethod(this, params);
-    },
+
 
     shortcuts: {
         /**

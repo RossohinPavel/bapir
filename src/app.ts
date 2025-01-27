@@ -1,6 +1,9 @@
-import { func } from "./func";
+import { UserScope } from "./app/request/user/scope";
 
 
-export const value = (function () {
-    return func();
-})();
+/**
+ * Базовый объект для доступа к запросам. Bitrix 24 API Requests.
+ */
+export namespace bapir {
+    export const user = UserScope;
+}
