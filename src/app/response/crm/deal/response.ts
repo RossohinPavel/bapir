@@ -1,7 +1,13 @@
+import { Response, ResponseArray } from "../../response";
 
-// class CRMDealResponse extends Response {
 
-//     /**
+class Deal extends Response {}
+
+
+class DealsArray extends ResponseArray {
+    // static item = Deal;
+
+    //     /**
 //      * Метод для получения Компаний из сделок.
 //      * В объектах сделок должен присутствовать ключ COMPANY_ID.
 //      * 
@@ -102,3 +108,4 @@
 //         return products;
 //     }
 // }
+}

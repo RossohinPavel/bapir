@@ -1,4 +1,4 @@
-import { ResponseType } from "../response/response";
+import { Response, ResponseArray } from "../response/response";
 
 
 // Проверка на присутствие класса-обертки BX24Wrapper
@@ -15,6 +15,8 @@ const BX24W = new _BX24Wrapper();
 
 type ParamsType = {[key: string]: any};
 
+type ResponseClass = typeof Response | typeof ResponseArray | null;
+
 
 /**
  * Замыкание, которое реализует общую логику работы библиотеки.
@@ -23,10 +25,10 @@ type ParamsType = {[key: string]: any};
  * @returns Асинхронную функцию для запроса.
  */
 function requestClosure(func: any) {
-    async function wrapper(endpoint: string, params: ParamsType = {}, responseClass: ResponseType | null = null): Promise<Response> {
+    async function wrapper(endpoint: string, params: ParamsType = {}, responseClass: ResponseClass = null): Promise<Response | ResponseArray> {
         let result = await func(endpoint, params);
         if ( responseClass !== null ) {
-            result = Object.assign(new responseClass(), result);
+            return new responseClass(result);
         }
         return result;
     }
