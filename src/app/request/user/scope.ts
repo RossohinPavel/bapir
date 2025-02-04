@@ -1,10 +1,10 @@
 import { Call } from "../_request";
 
 
-type GetParams = {
+export type GetParams = {
     sort?: string,
     order?: string,
-    [key: string]: string | number | boolean
+    [key: string]: string | string[] | number | number[] | boolean
 }
 
 

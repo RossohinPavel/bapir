@@ -1,9 +1,9 @@
 import { Call } from "../../_request";
 
 
-type commonParam = string | number | boolean;
+type commonParam = string | string[] | number | number[] | boolean;
 
-type ListParams = {
+export type ListParams = {
     select?: string[],
     filter?: {[key: string]: commonParam},
     order?: {[key: string]: string}

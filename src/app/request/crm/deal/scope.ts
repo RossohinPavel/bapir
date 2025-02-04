@@ -1,5 +1,8 @@
 import { Call } from "../../_request";
+import { DealsArray } from "../../../response/crm/deal/response";
+
 import { UserfieldScope } from "./userfield/scope";
+
 
 
 type commonParam = string | number | boolean;
@@ -29,6 +32,6 @@ export namespace DealScope {
      * @returns
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.deal.list', params);
+        return await Call.listMethod('crm.deal.list', params, DealsArray);
     }
 }
