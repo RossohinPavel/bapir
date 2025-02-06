@@ -1,4 +1,4 @@
-import { Response, ResponseArray } from "../response/response";
+import { Response, ResponseArray, ResponseBatch } from "../response/response";
 
 
 // Проверка на присутствие класса-обертки BX24Wrapper
@@ -15,7 +15,7 @@ const BX24W = new _BX24Wrapper();
 
 type ParamsType = {[key: string]: any};
 
-type ResponseClass = typeof Response | typeof ResponseArray | null;
+type ResponseClass = typeof Response | typeof ResponseArray | typeof ResponseBatch | null;
 
 
 /**
@@ -57,11 +57,15 @@ export namespace Call {
      * @param requests Массив запросов. Должны быть сформированы по правилам битрикса
      * @returns Результат батч-запроса.
      */
-    export async function callLongBatch(endpoint: string, requests: any[]): Promise<any[]> {
+    export async function longBatch(endpoint: string, requests: any[], responseClass: ResponseClass = null): Promise<any[] | ResponseBatch> {
         if ( !requests.length ) {
             return [];
         }
         const calls = _BX24Wrapper.createCalls(endpoint, requests);
-        return await BX24W.callLongBatch(calls, false);
+        const response = await BX24W.callLongBatch(calls, false);
+        if ( responseClass !== null ) {
+            return new responseClass(response) as ResponseBatch;
+        }
+        return response;
     }
 }

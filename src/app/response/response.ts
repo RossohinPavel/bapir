@@ -53,3 +53,20 @@ export class ResponseArray extends Array<Response | Data> {
         return obj;
     }
 }
+
+/**
+ * Абстрактный класс для наследования батч-ответов.
+ */
+export class ResponseBatch extends Array<any> {
+
+    /**
+     * Для удобства перебора элементов в батч-ответах
+     */
+    *_flatIterator() {
+        for ( const itemGroup of this ) {
+            for ( const item of itemGroup ) {
+                yield item;
+            }
+        }
+    }
+}
