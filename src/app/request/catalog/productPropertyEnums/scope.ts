@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { ProductPropertyEnumArray } from "../../../response/catalog/productPropertyEnums/response";
+import { ProductPropertyEnumsResponse } from "../../../response/catalog/productPropertyEnums/response";
 
 
 type commonParam = string | number | boolean;
@@ -27,7 +27,7 @@ export namespace ProductPropertyEnumScope {
      * @param params.order Объект полей для Сортировки
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('catalog.productPropertyEnum.list', params, ProductPropertyEnumArray);
+        return await Call.listMethod('catalog.productPropertyEnum.list', params, ProductPropertyEnumsResponse.arrayHandler);
     }
 
     /**

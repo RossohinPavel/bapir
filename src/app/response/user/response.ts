@@ -1,16 +1,16 @@
-import { Response } from "../response";
+// import { ResponseHandler } from "../handlers";
 
 
-export namespace UserResponse {
-    export const handler = {
-        ...Response.handler,
-    }
+// export namespace UserResponse {
+//     export const handler = {
+//         ...ResponseHandler.object,
+//     }
 
-    export const arrayHandler = {
-        ...Response.arrayHandler,
-    }
+//     export const arrayHandler = {
+//         ...ResponseHandler.array,
+//     }
 
-    export const batchHandler = {
-        ...Response.batchHandler,
-    }
-}
+//     export const batchHandler = {
+//         ...ResponseHandler.batch,
+//     }
+// }

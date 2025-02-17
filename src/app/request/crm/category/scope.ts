@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { CategoryArray } from "../../../response/crm/category/response";
+import { CategoryResponse } from "../../../response/crm/category/response";
 
 
 type ListParams = {
@@ -22,7 +22,7 @@ export namespace CategoryScope {
      * @param params.entityTypeId - ИД црм сущности
      */
     export async function list(params: ListParams = {entityTypeId: 2}) {
-        return await Call.listMethod('crm.category.list', params, CategoryArray);
+        return await Call.listMethod('crm.category.list', params, CategoryResponse.arrayHandler);
     }
 
     /**

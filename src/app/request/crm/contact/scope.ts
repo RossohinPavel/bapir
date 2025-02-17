@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { ContactArray } from "../../../response/crm/contact/response";
+import { ContactResponse } from "../../../response/crm/contact/response";
 
 
 type commonParam = string | string[] | number | number[] | boolean;
@@ -23,6 +23,6 @@ export namespace ContactScope {
      * @param params.order Объект полей для Сортировки
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.contact.list', params, ContactArray);
+        return await Call.listMethod('crm.contact.list', params, ContactResponse.arrayHandler);
     }
 }

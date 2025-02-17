@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { DealsArray } from "../../../response/crm/deal/response";
+import { DealResponse } from "../../../response/crm/deal/response";
 
 import { UserfieldScope } from "./userfield/scope";
 
@@ -32,6 +32,6 @@ export namespace DealScope {
      * @returns
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.deal.list', params, DealsArray);
+        return await Call.listMethod('crm.deal.list', params, DealResponse.arrayHandler);
     }
 }

@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { ProductArray } from "../../../response/catalog/product/response";
+import { ProductResponse } from "../../../response/catalog/product/response";
 
 
 type commonParam = string | number | boolean;
@@ -27,6 +27,6 @@ export namespace ProductScope {
      * @param params.order - Объект полей для Сортировки
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('catalog.product.list', params, ProductArray);
+        return await Call.listMethod('catalog.product.list', params, ProductResponse.arrayHandler);
     }
 }

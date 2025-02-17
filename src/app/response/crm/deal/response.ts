@@ -1,4 +1,4 @@
-import { Response } from "../../response";
+import { ResponseHandler } from "../../handlers";
 import { Call } from "../../../request/request";
 
 import { CompanyScope, ListParams as CompanyParams } from "../../../request/crm/company/scope";
@@ -10,11 +10,11 @@ import { ProductrowsResponse } from "./productRows/response";
 
 export namespace DealResponse {
     export const handler = {
-        ...Response.handler,
+        ...ResponseHandler.object,
     }
 
     export const arrayHandler = {
-        ...Response.arrayHandler,
+        ...ResponseHandler.array,
 
         /**
          * Метод для получения Компаний из сделок.
@@ -100,7 +100,7 @@ export namespace DealResponse {
     }
 
     export const batchHandler = {
-        ...Response.batchHandler,
+        ...ResponseHandler.batch,
     }
 }
 

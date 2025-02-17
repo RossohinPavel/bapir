@@ -1,16 +1,16 @@
-import { Response } from "../../response";
+import { ResponseHandler } from "../../handlers";
 
 
 export namespace ProductPropertyEnumsResponse {
     export const handler = {
-        ...Response.handler,
+        ...ResponseHandler.object,
     }
 
     export const arrayHandler = {
-        ...Response.arrayHandler,
+        ...ResponseHandler.array,
     }
 
     export const batchHandler = {
-        ...Response.batchHandler,
+        ...ResponseHandler.batch,
     }
 }

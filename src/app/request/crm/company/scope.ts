@@ -1,5 +1,5 @@
 import { Call } from "../../request";
-import { CompanyArray } from "../../../response/crm/company/response";
+import { CompanyResponse } from "../../../response/crm/company/response";
 
 
 type commonParam = string | string[] | number | number[] | boolean;
@@ -23,6 +23,6 @@ export namespace CompanyScope {
      * @param params.order Объект полей для Сортировки
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.company.list', params, CompanyArray);
+        return await Call.listMethod('crm.company.list', params, CompanyResponse.arrayHandler);
     }
 }
