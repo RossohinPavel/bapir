@@ -1,6 +1,7 @@
 import { Call } from "../../_request";
 import { ProductPropertyEnumArray } from "../../../response/catalog/productPropertyEnums/response";
 
+
 type commonParam = string | number | boolean;
 
 type ListParams = {
