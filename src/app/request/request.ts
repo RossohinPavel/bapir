@@ -1,6 +1,3 @@
-import { Response, ResponseArray, ResponseBatch } from "../response/response";
-
-
 // Проверка на присутствие класса-обертки BX24Wrapper
 if ( !("BX24Wrapper" in window) && (typeof BX24Wrapper === 'undefined') ) {
     throw "Can't find BX24Wrapper! See https://github.com/andrey-tech/bx24-wrapper-js";
@@ -17,11 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
-
 type ParamsType = {[key: string]: any};
-
-type ResponseClass = typeof Response | typeof ResponseArray | typeof ResponseBatch | null;
+type BX24WResponse = ParamsType;
 
 
 /**
@@ -32,31 +26,25 @@ export namespace Call {
     /**
      * Вызов BX24W.callMethod.
      */
-    export async function method(
+    export async function method<T extends BX24WResponse>(
         endpoint: string, 
         params: ParamsType = {}, 
-        responseClass: ResponseClass = null
-    ): Promise<Response | ResponseArray> {
+        handler: object = null
+    ): Promise<T | ProxyHandler<T>> {
         let result = await window.BX24W.callMethod(endpoint, params);
-        if ( responseClass !== null ) {
-            return new responseClass(result as any);
-        }
-        return result;
+        return handler === null ? result : new Proxy(result, handler);
     }
 
     /**
      * Вызов BX24W.callListMethod.
      */
-    export async function listMethod(
+    export async function listMethod<T extends BX24WResponse[]>(
         endpoint: string, 
         params: ParamsType = {}, 
-        responseClass: ResponseClass = null
-    ): Promise<Response | ResponseArray> {
-        let result = await window.BX24W.callListMethod(endpoint, params);
-        if ( responseClass !== null ) {
-            return new responseClass(result as any);
-        }
-        return result;
+        handler: object = null
+    ): Promise<T | ProxyHandler<T>> {
+        let result = await window.BX24W.callListMethod(endpoint, params) as BX24WResponse;
+        return handler === null ? result : new Proxy(result, handler);
     }
 
     /**
@@ -68,16 +56,13 @@ export namespace Call {
     export async function longBatch(
         endpoint: string, 
         requests: any[], 
-        responseClass: typeof ResponseBatch = null
-    ): Promise<ResponseBatch | any[]> {
+        handler: object = null
+    ): Promise<any[] | ProxyHandler<any[]>> {
         if ( !requests.length ) {
             return [];
         }
         const calls = BX24Wrapper.createCalls(endpoint, requests);
-        const response = await window.BX24W.callLongBatch(calls, false);
-        if ( responseClass !== null ) {
-            return new responseClass(response) as ResponseBatch;
-        }
-        return response;
+        const result = await window.BX24W.callLongBatch(calls, false);
+        return handler === null ? result : new Proxy(result, handler);
     }
 }

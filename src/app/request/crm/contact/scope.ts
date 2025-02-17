@@ -1,4 +1,4 @@
-import { Call } from "../../_request";
+import { Call } from "../../request";
 import { ContactArray } from "../../../response/crm/contact/response";
 
 

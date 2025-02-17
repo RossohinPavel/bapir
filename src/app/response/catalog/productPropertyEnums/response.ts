@@ -1,10 +1,16 @@
-import { Response, ResponseArray, ResponseBatch } from "../../response";
+import { Response } from "../../response";
 
 
-export class ProductPropertyEnumResponse extends Response {}
+export namespace ProductPropertyEnumsResponse {
+    export const handler = {
+        ...Response.handler,
+    }
 
+    export const arrayHandler = {
+        ...Response.arrayHandler,
+    }
 
-export class ProductPropertyEnumArray extends ResponseArray {}
-
-
-export class ProductPropertyEnumBatch extends ResponseBatch {}
+    export const batchHandler = {
+        ...Response.batchHandler,
+    }
+}

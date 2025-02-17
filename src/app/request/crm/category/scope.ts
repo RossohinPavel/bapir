@@ -1,4 +1,4 @@
-import { Call } from "../../_request";
+import { Call } from "../../request";
 import { CategoryArray } from "../../../response/crm/category/response";
 
 

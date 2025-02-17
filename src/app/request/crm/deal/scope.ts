@@ -1,4 +1,4 @@
-import { Call } from "../../_request";
+import { Call } from "../../request";
 import { DealsArray } from "../../../response/crm/deal/response";
 
 import { UserfieldScope } from "./userfield/scope";

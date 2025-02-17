@@ -1,10 +1,16 @@
-import { Response, ResponseArray, ResponseBatch } from "../response";
+import { Response } from "../response";
 
 
-export class UserResponse extends Response {}
+export namespace UserResponse {
+    export const handler = {
+        ...Response.handler,
+    }
 
+    export const arrayHandler = {
+        ...Response.arrayHandler,
+    }
 
-export class UserArray extends ResponseArray {}
-
-
-export class UserBatch extends ResponseBatch {}
+    export const batchHandler = {
+        ...Response.batchHandler,
+    }
+}

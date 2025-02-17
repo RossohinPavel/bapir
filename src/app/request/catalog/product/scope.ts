@@ -1,4 +1,4 @@
-import { Call } from "../../_request";
+import { Call } from "../../request";
 import { ProductArray } from "../../../response/catalog/product/response";
 
 

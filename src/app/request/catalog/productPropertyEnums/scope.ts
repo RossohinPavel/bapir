@@ -1,4 +1,4 @@
-import { Call } from "../../_request";
+import { Call } from "../../request";
 import { ProductPropertyEnumArray } from "../../../response/catalog/productPropertyEnums/response";
 
 

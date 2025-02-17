@@ -1,5 +1,5 @@
-import { Call } from "../../_request";
-import { StatusArray } from "../../../response/crm/status/response";
+import { Call } from "../../request";
+import { StatusResponse } from "../../../response/crm/status/response";
 
 
 type commonParam = string | number | boolean;
@@ -25,7 +25,7 @@ export namespace StatusScope {
      * @param {object} params.order - Сортировка, например { "SORT": "ASC" }
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.status.list', params, StatusArray);
+        return await Call.listMethod('crm.status.list', params, StatusResponse.arrayHandler);
     }
 
     /**

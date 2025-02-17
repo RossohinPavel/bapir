@@ -1,4 +1,4 @@
-import { Call } from "../_request";
+import { Call } from "../request";
 import { UserResponse } from "../../response/user/response";
 
 
@@ -26,7 +26,7 @@ export namespace UserScope {
      */
     export async function get(params: GetParams = {}) {
         params.ACTIVE === undefined && (params.ACTIVE = true);
-        return await Call.listMethod('user.get', params, UserResponse);
+        return await Call.listMethod('user.get', params, UserResponse.arrayHandler);
     }
 
     /**
