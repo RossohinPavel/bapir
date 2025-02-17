@@ -1,4 +1,5 @@
 import { Call } from "../../_request";
+import { ProductArray } from "../../../response/catalog/product/response";
 
 
 type commonParam = string | number | boolean;
@@ -26,6 +27,6 @@ export namespace ProductScope {
      * @param params.order - Объект полей для Сортировки
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('catalog.product.list', params);
+        return await Call.listMethod('catalog.product.list', params, ProductArray);
     }
 }

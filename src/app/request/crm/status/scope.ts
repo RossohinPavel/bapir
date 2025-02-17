@@ -1,4 +1,6 @@
-import { Call } from "../../_request"
+import { Call } from "../../_request";
+import { StatusArray } from "../../../response/crm/status/response";
+
 
 type commonParam = string | number | boolean;
 
@@ -6,6 +8,7 @@ type ListParams = {
     filter?: {[key: string]: commonParam },
     order?: {[key: string]: string },
 }
+
 
 /**
  * Запросы к справочникам crm
@@ -22,7 +25,7 @@ export namespace StatusScope {
      * @param {object} params.order - Сортировка, например { "SORT": "ASC" }
      */
     export async function list(params: ListParams = {}) {
-        return await Call.listMethod('crm.status.list', params);
+        return await Call.listMethod('crm.status.list', params, StatusArray);
     }
 
     /**

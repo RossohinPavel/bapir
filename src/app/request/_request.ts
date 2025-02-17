@@ -6,34 +6,22 @@ if ( !("BX24Wrapper" in window) && (typeof BX24Wrapper === 'undefined') ) {
     throw "Can't find BX24Wrapper! See https://github.com/andrey-tech/bx24-wrapper-js";
 };
 
+declare global {
+    interface Window {
+        BX24W: BX24Wrapper
+    }
+}
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const _BX24Wrapper = BX24Wrapper;
-const BX24W = new _BX24Wrapper();
+document.addEventListener('DOMContentLoaded', () => {
+    window.BX24W = new BX24Wrapper();
+});
+
+
 
 
 type ParamsType = {[key: string]: any};
 
 type ResponseClass = typeof Response | typeof ResponseArray | typeof ResponseBatch | null;
-
-
-/**
- * Замыкание, которое реализует общую логику работы библиотеки.
- * Вызывает переданную func и помещает ее результат в переданный объект responseClass.
- * @param func Метод библиотеки BX24
- * @returns Асинхронную функцию для запроса.
- */
-function requestClosure(func: any) {
-    async function wrapper(endpoint: string, params: ParamsType = {}, responseClass: ResponseClass = null): Promise<Response | ResponseArray> {
-        let result = await func(endpoint, params);
-        if ( responseClass !== null ) {
-            return new responseClass(result);
-        }
-        return result;
-    }
-    return wrapper;
-}
 
 
 /**
@@ -44,12 +32,32 @@ export namespace Call {
     /**
      * Вызов BX24W.callMethod.
      */
-    export const method = requestClosure(BX24W.callMethod);
+    export async function method(
+        endpoint: string, 
+        params: ParamsType = {}, 
+        responseClass: ResponseClass = null
+    ): Promise<Response | ResponseArray> {
+        let result = await window.BX24W.callMethod(endpoint, params);
+        if ( responseClass !== null ) {
+            return new responseClass(result as any);
+        }
+        return result;
+    }
 
     /**
      * Вызов BX24W.callListMethod.
      */
-    export const listMethod = requestClosure(BX24W.callListMethod);
+    export async function listMethod(
+        endpoint: string, 
+        params: ParamsType = {}, 
+        responseClass: ResponseClass = null
+    ): Promise<Response | ResponseArray> {
+        let result = await window.BX24W.callListMethod(endpoint, params);
+        if ( responseClass !== null ) {
+            return new responseClass(result as any);
+        }
+        return result;
+    }
 
     /**
      * Асинхронная функция для работы с батчами.
@@ -57,12 +65,16 @@ export namespace Call {
      * @param requests Массив запросов. Должны быть сформированы по правилам битрикса
      * @returns Результат батч-запроса.
      */
-    export async function longBatch(endpoint: string, requests: any[], responseClass: ResponseClass = null): Promise<any[] | ResponseBatch> {
+    export async function longBatch(
+        endpoint: string, 
+        requests: any[], 
+        responseClass: typeof ResponseBatch = null
+    ): Promise<ResponseBatch | any[]> {
         if ( !requests.length ) {
             return [];
         }
-        const calls = _BX24Wrapper.createCalls(endpoint, requests);
-        const response = await BX24W.callLongBatch(calls, false);
+        const calls = BX24Wrapper.createCalls(endpoint, requests);
+        const response = await window.BX24W.callLongBatch(calls, false);
         if ( responseClass !== null ) {
             return new responseClass(response) as ResponseBatch;
         }

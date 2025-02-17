@@ -1,5 +1,6 @@
 import path from 'path';
 import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
 
 
 const filename = `${process.env.npm_package_name}-${process.env.npm_package_version}.js`;
@@ -28,6 +29,19 @@ const config: webpack.Configuration = {
     resolve: {
         extensions: ['.ts', '.tsx'],
     },
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    compress: true,
+                    mangle: false,
+                    keep_classnames: true,
+                    keep_fnames: true
+                }
+            }),
+        ]
+    }
 };
 
 

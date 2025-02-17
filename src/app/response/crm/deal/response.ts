@@ -1,7 +1,11 @@
 import { Response, ResponseArray } from "../../response";
+import { Call } from "../../../request/_request";
+
 import { CompanyScope, ListParams as CompanyParams } from "../../../request/crm/company/scope";
 import { ContactScope, ListParams as ContactParams } from "../../../request/crm/contact/scope";
 import { UserScope, GetParams as UserParams } from "../../../request/user/scope";
+
+import { ProductrowsBatch } from "./productRows/response";
 
 
 export class Deal extends Response {}
@@ -78,21 +82,17 @@ export class DealsArray extends ResponseArray {
         return requests;
     }
 
-    // /**
-    //  * Получает продукты из сделок. 
-    //  * В объектах ответа this.result должен присутствовать ключ ID.
-    //  * Вызывает метод callLongBatch
-    //  * 
-    //  * @async
-    //  * @returns
-    //  */
-    // async products() {
-    //     const requests = [];
-    //     for ( const deal of this.flatIterator() ) {
-    //         deal.ID && requests.push({'id': deal.ID});
-    //     };
-    //     const products = new CRMDealProductrowsResponse();
-    //     products.result = await Request.callLongBatch('crm.deal.productrows.get', requests);
-    //     return products;
-    // }
+    /**
+     * Получает продукты из сделок. 
+     * В объектах ответа this.result должен присутствовать ключ ID.
+     * Вызывает метод callLongBatch
+     * @async
+     */
+    async products() {
+        const requests = [];
+        for ( const deal of this ) {
+            deal.ID && requests.push({'id': deal.ID});
+        };
+        return await Call.longBatch('crm.deal.productrows.get', requests, ProductrowsBatch);
+    }
 }

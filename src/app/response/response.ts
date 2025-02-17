@@ -57,7 +57,12 @@ export class ResponseArray extends Array<Response | Data> {
 /**
  * Абстрактный класс для наследования батч-ответов.
  */
-export class ResponseBatch extends Array<any> {
+export class ResponseBatch extends Array<any[]> {
+
+    constructor(data: any[]) {
+        super();
+        this.push(...data);
+    }
 
     /**
      * Для удобства перебора элементов в батч-ответах
