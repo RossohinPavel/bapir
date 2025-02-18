@@ -1,6 +1,6 @@
-import { CatalogScope } from "./app/request/catalog/scope";
-import { CRMScope } from "./app/request/crm/scope";
-import { UserScope } from "./app/request/user/scope";
+import { CatalogScope } from "./request/catalog/scope";
+import { CRMScope } from "./request/crm/scope";
+import { UserScope } from "./request/user/scope";
 
 
 /**
