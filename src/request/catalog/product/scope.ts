@@ -1,5 +1,8 @@
 import { Call } from "../../request";
+import { OfferScope } from "./offer/scope";
+
 import { ProductHandler } from "../../../response/catalog/product/handler";
+
 
 
 type commonParam = string | number | boolean;
@@ -15,6 +18,7 @@ type ListParams = {
  * Запросы для catalog.product
  */
 export namespace ProductScope {
+    export const offer = OfferScope;
     
     /**
      * Получает список товаров по фильтру.
